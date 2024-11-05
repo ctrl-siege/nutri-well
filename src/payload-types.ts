@@ -13,16 +13,35 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    patients: Patient;
+    'nutrition-assessments': NutritionAssessment;
+    'nutrition-diagnoses': NutritionDiagnosis;
+    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
+  collectionsSelect?: {
+    users: UsersSelect<false> | UsersSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
+    patients: PatientsSelect<false> | PatientsSelect<true>;
+    'nutrition-assessments': NutritionAssessmentsSelect<false> | NutritionAssessmentsSelect<true>;
+    'nutrition-diagnoses': NutritionDiagnosesSelect<false> | NutritionDiagnosesSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+  };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   globals: {};
+  globalsSelect?: {};
   locale: null;
   user: User & {
     collection: 'users';
+  };
+  jobs?: {
+    tasks: unknown;
+    workflows?: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -48,7 +67,7 @@ export interface UserAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -65,7 +84,7 @@ export interface User {
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
+  id: number;
   alt: string;
   updatedAt: string;
   createdAt: string;
@@ -81,13 +100,226 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "patients".
+ */
+export interface Patient {
+  id: number;
+  firstName: string;
+  lastName: string;
+  fullName?: string | null;
+  birthDate: string;
+  gender: 'Male' | 'Female' | 'Other';
+  email: string;
+  collegeDepartment:
+    | 'nursing'
+    | 'medicine'
+    | 'pharmacy'
+    | 'dentistry'
+    | 'allied_medical'
+    | 'public_health'
+    | 'arts_sciences'
+    | 'engineering'
+    | 'education'
+    | 'business';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nutrition-assessments".
+ */
+export interface NutritionAssessment {
+  id: number;
+  patient: number | Patient;
+  assessmentDate: string;
+  foodNutritionHistory: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  anthropometric: {
+    height: number;
+    weight: number;
+    bmi?: number | null;
+    notes?: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+  };
+  biochemicalData: {
+    content: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    };
+    attachments?: (number | Media)[] | null;
+  };
+  physicalFindings: {
+    content: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    };
+    attachments?: (number | Media)[] | null;
+  };
+  clientHistory: {
+    content: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    };
+    attachments?: (number | Media)[] | null;
+  };
+  assessmentTools: {
+    content: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    };
+    attachments?: (number | Media)[] | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nutrition-diagnoses".
+ */
+export interface NutritionDiagnosis {
+  id: number;
+  patient: number | Patient;
+  assessment: number | NutritionAssessment;
+  diagnosisDate: string;
+  domainNotes?: {
+    intake?: string | null;
+    clinical?: string | null;
+    behavioral?: string | null;
+    other?: string | null;
+  };
+  nutritionProblems?:
+    | {
+        domain: 'NI' | 'NC' | 'NB' | 'NO';
+        content: string;
+        id?: string | null;
+      }[]
+    | null;
+  pesStatements?:
+    | {
+        problem: string;
+        etiology: string;
+        signs: string;
+        id?: string | null;
+      }[]
+    | null;
+  status: 'draft' | 'submitted' | 'reviewed' | 'approved';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: number;
+  document?:
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'patients';
+        value: number | Patient;
+      } | null)
+    | ({
+        relationTo: 'nutrition-assessments';
+        value: number | NutritionAssessment;
+      } | null)
+    | ({
+        relationTo: 'nutrition-diagnoses';
+        value: number | NutritionDiagnosis;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: number | User;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -107,11 +339,169 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "patients_select".
+ */
+export interface PatientsSelect<T extends boolean = true> {
+  firstName?: T;
+  lastName?: T;
+  fullName?: T;
+  birthDate?: T;
+  gender?: T;
+  email?: T;
+  collegeDepartment?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nutrition-assessments_select".
+ */
+export interface NutritionAssessmentsSelect<T extends boolean = true> {
+  patient?: T;
+  assessmentDate?: T;
+  foodNutritionHistory?: T;
+  anthropometric?:
+    | T
+    | {
+        height?: T;
+        weight?: T;
+        bmi?: T;
+        notes?: T;
+      };
+  biochemicalData?:
+    | T
+    | {
+        content?: T;
+        attachments?: T;
+      };
+  physicalFindings?:
+    | T
+    | {
+        content?: T;
+        attachments?: T;
+      };
+  clientHistory?:
+    | T
+    | {
+        content?: T;
+        attachments?: T;
+      };
+  assessmentTools?:
+    | T
+    | {
+        content?: T;
+        attachments?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nutrition-diagnoses_select".
+ */
+export interface NutritionDiagnosesSelect<T extends boolean = true> {
+  patient?: T;
+  assessment?: T;
+  diagnosisDate?: T;
+  domainNotes?:
+    | T
+    | {
+        intake?: T;
+        clinical?: T;
+        behavioral?: T;
+        other?: T;
+      };
+  nutritionProblems?:
+    | T
+    | {
+        domain?: T;
+        content?: T;
+        id?: T;
+      };
+  pesStatements?:
+    | T
+    | {
+        problem?: T;
+        etiology?: T;
+        signs?: T;
+        id?: T;
+      };
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_select".
+ */
+export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
+  document?: T;
+  globalSlug?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_select".
+ */
+export interface PayloadPreferencesSelect<T extends boolean = true> {
+  user?: T;
+  key?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_select".
+ */
+export interface PayloadMigrationsSelect<T extends boolean = true> {
+  name?: T;
+  batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
